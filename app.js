@@ -54,7 +54,6 @@ var topicSchema = new Schema({
   title: String,
   description: String,
   user: String,
-  likes: Number,
   comments: [{
     user: String,
     comment: String
@@ -88,48 +87,170 @@ app.get('/', function(req, res){
   res.send(default_html);
 });
 
-app.get('/index/', function(req, res, next){
-  var start1 = "start1";
-  res.write('<!DOCTYPE html>' +
+app.get('/topicDetails/:id/', function(req, res, next){
+
+  Topic.findById(req.params.id, function(err, topic){
+
+    if(err) throw err;
+
+    var tmpDetails = "";
+    var z = "";
+
+    if(topic != null){
+      tmpDetails = [topic.title, topic.description, topic.user];
+      var topicComments = [];
+
+      topic.comments.forEach(function(topic){
+        topicComments.push('<div><div><a>' + topic.user + '</a></div>' + '<div>' + topic.comment + '</div></div>');
+      });
+
+      z = "/topicDetails/" + req.params.id;
+
+      var body1 = '<!DOCTYPE html>' +
             '<html>' +
             '<head>' +
             '<meta charset="utf-8"/>' +
             '<title>Mentions</title>' +
             '</head>' +
             '<body>' +
-            '<div id='
-          );
-
-  res.write(start1);
-
-  res.write('>' +
-              '<h1>Welcome to Mentions!</h1>' +
-              '<div><a href="/topic">Criar Topico</a></div>' +
-              '<div><a href="/logout">Logout</a></div>' +
+            '<div id="contact">' +
+            '<h1>Details</h1>' +
+            '<div>' +
+            '<div>'+
+              tmpDetails[0] +
             '</div>' +
-            '</body>' +
-            '</html>');
-  res.end();
-  next();
+            '<div>' +
+              tmpDetails[1] +
+            '</div>' +
+            '<div>' +
+              'by: ' + tmpDetails[2] +
+            '</div>' +
+            '</div>' +
+              topicComments.length + " Comentarios: ";
+            '<div>' +
+            '<div>';
+
+      res.write(body1);
+
+      topicComments.forEach(function(comment){
+          res.write(comment);
+      });
+
+      var body2 = '</div>' +
+                  '</div>' +
+                  '<form action=' + z + ' method="post">' +
+                    '<fieldset>' +
+                      '<div>' +
+                        '<textarea rows="4" cols="50" name="comentario" placeholder="Write a comment..."></textarea>' +
+                      '</div>' +
+                      '<input type="submit" value="Submeter Comentário"/>' +
+                    '</fieldset>' +
+                  '</form>' +
+                  '</div>' +
+                  '</body>' +
+                  '</html>'
+
+      res.write(body2);
+      res.end();
+      next();
+
+    }else{
+      res.redirect("/Topic");
+    }
+
+  });
+
 });
 
-app.get('/topic/', function(req, res){
+// app.post('/topicDetails/:Comentario', function(req, res) {
+//
+//   console.log(req.body.Comentario);
+//
+// });
 
-  //buscar topicos base de dados (ainda nao implementado)
+app.post('/topicDetails/:id', function(req, res) {
 
+  var username = fs.readFileSync('tmpdata.txt', 'utf-8');
 
+  if(req.body.comentario != ""){
 
-  res.send('<!DOCTYPE html>' +
-  '<html>' +
-  '<head>' +
-  '<meta charset="utf-8" />' +
-  '<title>Topic</title>' +
-  '</head>' +
-  '<body>' +
-  //insert divs dos topicos here +
-  '<div id="contact">' +
-      '<h1>Criar novo tópico</h1>' +
-      '<form action="/topic" method="post">' +
+    Topic.findById(req.params.id, function(err, topic){
+
+      if(err) throw err;
+
+      Topic.findByIdAndUpdate(topic._id,
+                   {$push: {"comments":
+                   {
+                     user: username,
+                     comment: req.body.comentario
+                   }}},
+                 {safe: true, upsert: true},
+                 function(err, Topic){
+                   if(err) throw err;
+                 },
+                 //res.json(topic)
+                 res.redirect('/topicDetails/' + req.params.id)
+               );
+
+                 topic.save(function(err){
+                   if(err) res.send(err);
+                 });
+
+    });
+  }else{
+    res.redirect('/topicDetails/' + req.params.id);
+  }
+
+});
+
+app.get('/topic/', function(req, res, next){
+
+  var username = fs.readFileSync('tmpdata.txt', 'utf-8');
+
+  Topic.find({}, function(err, topics) {
+
+    var tmp = "";
+    var str = "";
+
+    var body1 = '<!DOCTYPE html>' +
+              '<html>' +
+              '<head>' +
+              '<meta charset="utf-8"/>' +
+              '<title>Mentions</title>' +
+              '</head>' +
+              '<body>' +
+              '<div>' +
+                '<h1>Welcome to Mentions!</h1>' +
+                '<div><a href="/newTopic">Criar Topico</a></div>' +
+                '<div><a href="/logout">Logout</a></div>' +
+              '</div>';
+
+    var body2 = '</body></html>';
+
+    res.write(body1);
+
+    topics.forEach(function(topic) {
+
+      tmp = "/topicDetails/" + topic._id;
+      str = '<div><div>' + "<a href=" + tmp + '>' + topic.title + '</a></div>' + '<div>' + topic.createdDate + '</div><div>' + username + '\n' + '</div></div>';
+
+      res.write(str);
+
+    });
+
+    res.write(body2);
+    res.end();
+    next();
+
+  });
+
+});
+
+app.get('/newTopic/', function(req, res, next){
+
+  res.write('<div id="contact">' +
+      '<h1>Criar novo topico</h1>' +
+      '<form action="/newTopic" method="post">' +
           '<fieldset>' +
             '<div>' +
               '<label for="title">Title:</label>' +
@@ -137,19 +258,21 @@ app.get('/topic/', function(req, res){
             '</div>' +
             '<div>' +
               '<label for="description">Description:</label>' +
-              '<textarea rows="4" cols="50" name="description" placeholder="Write something..."></textarea>' +
+              '<textarea rows="3" cols="50" name="description" placeholder="Write something..."></textarea>' +
             '</div>' +
 
-              '<input type="submit" value="Criar novo tópico" />' +
+              '<input type="submit" value="Criar novo topico" />' +
 
           '</fieldset>' +
       '</form>' +
   '</div>' +
   '</body>' +
   '</html>');
+  res.end();
+  next();
 });
 
-app.post('/topic/', function(req, res) {
+app.post('/newTopic/', function(req, res) {
 
   var username = fs.readFileSync('tmpdata.txt', 'utf-8');
 
@@ -157,11 +280,7 @@ app.post('/topic/', function(req, res) {
     title: req.body.title,
     description: req.body.description,
     user: username,
-    likes: 0,
-    comments: [{
-      user: "",
-      comment: ""
-    }]
+    comments: []
   });
 
   //save to database
@@ -170,7 +289,7 @@ app.post('/topic/', function(req, res) {
   });
 
   //reload current page
-  res.redirect('/index');
+  res.redirect('/Topic');
 
 });
 
@@ -220,13 +339,14 @@ app.post('/login/', function(req, res){
     }
 
     if(db_username === inserted_user && db_password === inserted_password){
+
       fs.writeFile('tmpdata.txt', inserted_user, function(err){
         if(err){
           return console.log(err);
         }
       });
 
-      res.redirect('/index');
+      res.redirect('/topic');
     }else{
       res.redirect('/login.html');
     }
