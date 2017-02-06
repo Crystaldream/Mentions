@@ -70,14 +70,27 @@ var default_html = '<!DOCTYPE html>' +
                    '<html>' +
                    '<head>' +
                    '<meta charset="utf-8"/>' +
+                   '<link rel="stylesheet" type="text/css" href="/style.css">' +
                    '<title>Mentions</title>' +
                    '</head>' +
                    '<body>' +
                    '<div>' +
                        '<h1>Welcome to Mentions!</h1>' +
-                       '<div><a href="/register">Register</a></div>' +
-                       '<div><a href="/login">Login</a></div>' +
+                       '<div class="main">' +
+                         '<div class="menu">' +
+                           '<div><a href="/register">Register</a></div>' +
+                           '<div><a href="/login">Login</a></div>' +
+                         '</div>' +
+                       '</div>' +
+                       '<div class="mainbox">' +
+                        'Interact with the community. ' +
+                        '<br>' +
+                        'Create topics of discussion. ' +
+                        '<br>' +
+                        'Discuss with other members! ' +
+                       '</div>' +
                    '</div>' +
+                   '<div class="footer">Created by Telmo Reinas</div>' +
                    '</body>' +
                    '</html>';
 
@@ -126,10 +139,6 @@ app.get('/topicDetails/:id/', function(req, res, next){
         var usr = fs.readFileSync('tmpdata.txt', 'utf-8');
         var typ = fs.readFileSync('tmptype.txt', 'utf-8');
 
-        console.log(" -> " + usr);
-        console.log(typ);
-        console.log(topic.user);
-
         topic.comments.forEach(function(topic){
           if(usr == topic.user && typ == "admin"){
             topicComments.push('<div id=' + topic._id + '><div>' + topic.user + '</div><div>' + topic.comment + '</div><a href=/topicDetails/' + req.params.id + '/' + topic.id + '/' + '>Remove</a></div>');
@@ -146,21 +155,29 @@ app.get('/topicDetails/:id/', function(req, res, next){
             '<html>' +
             '<head>' +
             '<meta charset="utf-8"/>' +
+            '<link rel="stylesheet" type="text/css" href="/style.css">' +
             '<title>Mentions</title>' +
             '</head>' +
             '<body>' +
             '<div id="contact">' +
-            '<h1>Details</h1>' +
+            '<h1>Topic Details</h1>' +
+            '<div class="side-topcs-menu">' +
+              '<div class="menu">Menu</div>' +
+              '<div><a href="/Topic">Topicos</a></div>' +
+              '<div><a href="/">Logout</a></div>' +
+            '</div>' +
+            '<div class="comments">' +
             '<div>' +
-            '<div>'+
-              tmpDetails[0] +
+              'Title: ' +
+                tmpDetails[0] +
             '</div>' +
             '<div>' +
-              tmpDetails[1] +
+              'Description: ' +
+                tmpDetails[1] +
             '</div>' +
             '<div>' +
-            'by: ' +
-              tmpDetails[2] +
+              'By: ' +
+                tmpDetails[2] +
             '</div>' +
             '</div>' +
             '<div>' +
@@ -183,6 +200,7 @@ app.get('/topicDetails/:id/', function(req, res, next){
                     '</fieldset>' +
                   '</form>' +
                   '</div>' +
+                  '<div class="footer">Created by Telmo Reinas</div>' +
                   '</body>' +
                   '</html>'
 
@@ -245,23 +263,27 @@ app.get('/topic/', function(req, res, next){
               '<html>' +
               '<head>' +
               '<meta charset="utf-8"/>' +
+              '<link rel="stylesheet" type="text/css" href="/style.css">' +
               '<title>Mentions</title>' +
               '</head>' +
               '<body>' +
               '<div>' +
-                '<h1>Welcome to Mentions!</h1>' +
-                '<div><a href="/newTopic">Criar Topico</a></div>' +
-                '<div><a href="/logout">Logout</a></div>' +
+                '<h1>Topicos Existentes</h1>' +
+                '<div class="side-topcs-menu">' +
+                  '<div class="menu">Menu</div>' +
+                  '<div><a href="/newTopic">Novo Topico</a></div>' +
+                  '<div><a href="/">Logout</a></div>' +
+                '</div>' +
               '</div>';
 
-    var body2 = '</body></html>';
+    var body2 = '<div class="footer">Created by Telmo Reinas</div></body></html>';
 
     res.write(body1);
 
     topics.forEach(function(topic) {
 
       tmp = "/topicDetails/" + topic._id;
-      str = '<div><div>' + "<a href=" + tmp + '>' + topic.title + '</a></div>' + '<div>' + topic.createdDate + '</div><div>' + username + '\n' + '</div></div>';
+      str = '<div class="topcs"><div>' + "<a href=" + tmp + '>Title: ' + topic.title + '</a></div>' + '<div>At: ' + topic.createdDate + '</div><div>By: ' + username + '\n' + '</div></div>';
 
       res.write(str);
 
@@ -277,26 +299,39 @@ app.get('/topic/', function(req, res, next){
 
 app.get('/newTopic/', function(req, res, next){
 
-  res.write('<div id="contact">' +
-      '<h1>Criar novo topico</h1>' +
-      '<form action="/newTopic" method="post">' +
-          '<fieldset>' +
-            '<div>' +
-              '<label for="title">Title:</label>' +
-              '<input type="text" id="title" name="title" placeholder="Title" />' +
+  res.write('<!DOCTYPE html>' +
+            '<html>' +
+            '<head>' +
+            '<meta charset="utf-8"/>' +
+            '<link rel="stylesheet" type="text/css" href="/style.css">' +
+            '<title>Mentions</title>' +
+            '</head>' +
+            '<body>' +
+            '<h1>Criar novo topico</h1>' +
+            '<div class="side-topcs-menu">' +
+              '<div class="menu">Menu</div>' +
+              '<div><a href="/Topic">Topicos</a></div>' +
+              '<div><a href="/">Logout</a></div>' +
             '</div>' +
-            '<div>' +
-              '<label for="description">Description:</label>' +
-              '<textarea rows="3" cols="50" name="description" placeholder="Write something..."></textarea>' +
-            '</div>' +
+            '<form action="/newTopic" method="post">' +
+            '<fieldset>' +
+              '<div>' +
+                '<label for="title">Title:</label>' +
+                '<input type="text" id="title" name="title" placeholder="Title" />' +
+              '</div>' +
+              '<div class="align">' +
+                '<label for="description">Description:</label>' +
+                '<textarea rows="3" cols="50" name="description" placeholder="Write something..."></textarea>' +
+              '</div>' +
 
               '<input type="submit" value="Criar novo topico" />' +
 
-          '</fieldset>' +
-      '</form>' +
-  '</div>' +
-  '</body>' +
-  '</html>');
+            '</fieldset>' +
+            '</form>' +
+        '</div>' +
+        '<div class="footer">Created by Telmo Reinas</div>' +
+        '</body>' +
+        '</html>');
   res.end();
   next();
 });

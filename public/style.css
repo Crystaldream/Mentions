@@ -1,0 +1,107 @@
+
+body {
+    background-color: #d4c4c4;
+}
+
+body h1 {
+    text-align: center;
+    border: 4px solid #000000;
+    width: 50%;
+    margin: 0 auto;
+}
+
+.main {
+  width: 10%;
+  margin-left: -100px;
+}
+
+.mainbox {
+  text-align: center;
+  border: 4px solid #000000;
+  width: 40%;
+  margin: 0 auto;
+}
+
+.menu {
+  border: 4px solid #000000;
+  width: 50%;
+  margin-top: 100px;
+  margin-left: 335px;
+}
+
+.side-topcs-menu {
+  border: 4px solid #000000;
+  width: 7%;
+  margin-top: 100px;
+  margin-left: 150px;
+}
+
+.side-topcs-menu .menu {
+  position: absolute;
+  width: 6.99%;
+  margin-top: -27px;
+  margin-left: -4px;
+  text-align: center;
+}
+
+.side-comnts-menu {
+  border: 4px solid #000000;
+  width: 7%;
+  margin-top: 100px;
+  margin-left: 150px;
+}
+
+.side-comnts-menu .menu {
+  position: absolute;
+  width: 6.99%;
+  margin-top: -25px;
+  margin-left: -2px;
+  text-align: center;
+}
+
+.side-topcs-create-menu {
+  border: 4px solid #000000;
+  width: 7%;
+  margin-top: 100px;
+  margin-left: 150px;
+}
+
+.side-topcs-create-menu .menu {
+  position: absolute;
+  width: 6.99%;
+  margin-top: -25px;
+  margin-left: -2px;
+  text-align: center;
+}
+
+fieldset {
+  width: 50%;
+  margin-top: 100px;
+  margin-left: 325px;
+  text-align: center;
+  border: 4px solid #000000;
+}
+
+.topcs {
+  width: 35%;
+  margin-top: 50px;
+  margin-left: 450px;
+  text-align: center;
+  border: 4px solid #000000;
+}
+
+.comments {
+  width: 35%;
+  margin-top: 50px;
+  margin-left: 450px;
+  text-align: center;
+  border: 4px solid #000000;
+}
+
+.footer {
+  border: 2px solid #000000;
+  width: 15%;
+  text-align: center;
+  margin-top: 100px;
+  margin-left: 550px;
+}
