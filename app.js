@@ -66,8 +66,6 @@ var topicSchema = new Schema({
 var User = mongoose.model('User', userSchema);
 var Topic = mongoose.model('Topic', topicSchema);
 
-start = "start0";
-
 var default_html = '<!DOCTYPE html>' +
                    '<html>' +
                    '<head>' +
@@ -75,7 +73,7 @@ var default_html = '<!DOCTYPE html>' +
                    '<title>Mentions</title>' +
                    '</head>' +
                    '<body>' +
-                   '<div id=' + start + '>' +
+                   '<div>' +
                        '<h1>Welcome to Mentions!</h1>' +
                        '<div><a href="/register">Register</a></div>' +
                        '<div><a href="/login">Login</a></div>' +
@@ -85,6 +83,31 @@ var default_html = '<!DOCTYPE html>' +
 
 app.get('/', function(req, res){
   res.send(default_html);
+});
+
+app.get('/topicDetails/:id/:iddel', function(req, res, next){
+  Topic.findById(req.params.id, function(err, topic){
+
+    if(err) throw err;
+
+    Topic.findByIdAndUpdate(topic._id,
+                 {$pull: {"comments":
+                 {
+                   _id: req.params.iddel,
+                 }}},
+               {safe: true, upsert: true},
+               function(err, Topic){
+                 if(err) throw err;
+               },
+               res.redirect('/topicDetails/' + req.params.id)
+             );
+
+               topic.save(function(err){
+                 if(err) res.send(err);
+               });
+
+   });
+
 });
 
 app.get('/topicDetails/:id/', function(req, res, next){
@@ -100,9 +123,22 @@ app.get('/topicDetails/:id/', function(req, res, next){
       tmpDetails = [topic.title, topic.description, topic.user];
       var topicComments = [];
 
-      topic.comments.forEach(function(topic){
-        topicComments.push('<div><div><a>' + topic.user + '</a></div>' + '<div>' + topic.comment + '</div></div>');
-      });
+        var usr = fs.readFileSync('tmpdata.txt', 'utf-8');
+        var typ = fs.readFileSync('tmptype.txt', 'utf-8');
+
+        console.log(" -> " + usr);
+        console.log(typ);
+        console.log(topic.user);
+
+        topic.comments.forEach(function(topic){
+          if(usr == topic.user && typ == "admin"){
+            topicComments.push('<div id=' + topic._id + '><div>' + topic.user + '</div><div>' + topic.comment + '</div><a href=/topicDetails/' + req.params.id + '/' + topic.id + '/' + '>Remove</a></div>');
+          }
+
+          if(usr == topic.user && typ == "normal") {
+            topicComments.push('<div id=' + topic._id + '><div>' + topic.user + '</div><div>' + topic.comment + '</div></div>');
+          }
+        });
 
       z = "/topicDetails/" + req.params.id;
 
@@ -123,17 +159,17 @@ app.get('/topicDetails/:id/', function(req, res, next){
               tmpDetails[1] +
             '</div>' +
             '<div>' +
-              'by: ' + tmpDetails[2] +
+            'by: ' +
+              tmpDetails[2] +
             '</div>' +
             '</div>' +
-              topicComments.length + " Comentarios: ";
             '<div>' +
             '<div>';
 
       res.write(body1);
 
-      topicComments.forEach(function(comment){
-          res.write(comment);
+      topicComments.forEach(function(topic){
+        res.write(topic);
       });
 
       var body2 = '</div>' +
@@ -154,19 +190,13 @@ app.get('/topicDetails/:id/', function(req, res, next){
       res.end();
       next();
 
-    }else{
+    } else {
       res.redirect("/Topic");
     }
 
   });
 
 });
-
-// app.post('/topicDetails/:Comentario', function(req, res) {
-//
-//   console.log(req.body.Comentario);
-//
-// });
 
 app.post('/topicDetails/:id', function(req, res) {
 
@@ -188,7 +218,6 @@ app.post('/topicDetails/:id', function(req, res) {
                  function(err, Topic){
                    if(err) throw err;
                  },
-                 //res.json(topic)
                  res.redirect('/topicDetails/' + req.params.id)
                );
 
@@ -341,6 +370,12 @@ app.post('/login/', function(req, res){
     if(db_username === inserted_user && db_password === inserted_password){
 
       fs.writeFile('tmpdata.txt', inserted_user, function(err){
+        if(err){
+          return console.log(err);
+        }
+      });
+
+      fs.writeFile('tmptype.txt', user.type, function(err){
         if(err){
           return console.log(err);
         }
